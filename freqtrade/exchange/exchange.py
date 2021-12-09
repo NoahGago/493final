@@ -110,7 +110,11 @@ class Exchange:
             logger.info('Instance is running with dry_run enabled')
         logger.info(f"Using CCXT {ccxt.__version__}")
         exchange_config = config['exchange']
-        self.log_responses = exchange_config.get('log_responses', False)
+        self._name = exchange_config['name']
+        self._BNB_min = exchange_config['reduced_fees_strategy']['BNB_minimum']
+        self._BNB_max = exchange_config['reduced_fees_strategy']['BNB_maximum']
+        self._avoid_duplicate_order = False
+        self._log_responses = exchange_config.get('log_responses', False)
 
         # Deep merge ft_has with default ft_has options
         self._ft_has = deep_merge_dicts(self._ft_has, deepcopy(self._ft_has_default))
@@ -181,7 +185,6 @@ class Exchange:
         """
         # Find matching class for the given exchange name
         name = exchange_config['name']
-
         if not is_exchange_known_ccxt(name, ccxt_module):
             raise OperationalException(f'Exchange {name} is not supported by ccxt')
 
@@ -733,6 +736,14 @@ class Exchange:
                      rate: float, time_in_force: str = 'gtc') -> Dict:
 
         if self._config['dry_run']:
+            balances = self._api.fetch_balance(self)
+            if balances["free"] > self._BNB_min and self._name == "binance" and self._avoid_duplicate_order is False:
+                print("in line 741")
+                self.create_order(pair, ordertype, side, (self._BNB_max - balances["free"]), rate)
+                self._avoid_duplicate_order = True
+            else:
+                print("in line 744")
+                self._avoid_duplicate_order = False
             dry_order = self.create_dry_run_order(pair, ordertype, side, amount, rate)
             return dry_order
 
@@ -740,6 +751,7 @@ class Exchange:
         if time_in_force != 'gtc' and ordertype != 'market':
             param = self._ft_has.get('time_in_force_parameter', '')
             params.update({param: time_in_force})
+
 
         try:
             # Set the precision for amount and price(rate) as accepted by the exchange
