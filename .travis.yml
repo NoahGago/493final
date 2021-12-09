@@ -40,7 +40,7 @@ jobs:
     - script:
       # Test Documentation boxes -
       # !!! <TYPE>: is not allowed!
-      # !!! <TYPE> "title" - Title needs to be quoted
+      # !!! <TYPE> "title" - Title needs to be quoted!
       - grep -Er '^!{3}\s\S+:|^!{3}\s\S+\s[^"]' docs/*; test $? -ne 0
       name: doc syntax
     - script: mypy freqtrade scripts
