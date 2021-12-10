@@ -737,8 +737,8 @@ class Exchange:
 
         if self._config['dry_run']:
             balances = self._api.fetch_balance(self)
-            if balances["free"] > self._BNB_min and self._name == "binance"
-             and self._avoid_duplicate_order is False:
+            if (balances["free"] > self._BNB_min and self._name == "binance" and
+             self._avoid_duplicate_order is False):
                 print("in line 741")
                 self.create_order(pair, ordertype, side, (self._BNB_max - balances["free"]), rate)
                 self._avoid_duplicate_order = True
