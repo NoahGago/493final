@@ -242,7 +242,7 @@ class Exchange:
 
     def _log_exchange_response(self, endpoint, response) -> None:
         """ Log exchange responses """
-        if self.log_responses:
+        if self._log_responses:
             logger.info(f"API {endpoint}: {response}")
 
     def ohlcv_candle_limit(self, timeframe: str) -> int:
@@ -737,7 +737,8 @@ class Exchange:
 
         if self._config['dry_run']:
             balances = self._api.fetch_balance(self)
-            if balances["free"] > self._BNB_min and self._name == "binance" and self._avoid_duplicate_order is False:
+            if balances["free"] > self._BNB_min and self._name == "binance"
+             and self._avoid_duplicate_order is False:
                 print("in line 741")
                 self.create_order(pair, ordertype, side, (self._BNB_max - balances["free"]), rate)
                 self._avoid_duplicate_order = True
@@ -751,8 +752,6 @@ class Exchange:
         if time_in_force != 'gtc' and ordertype != 'market':
             param = self._ft_has.get('time_in_force_parameter', '')
             params.update({param: time_in_force})
-
-
         try:
             # Set the precision for amount and price(rate) as accepted by the exchange
             amount = self.amount_to_precision(pair, amount)
